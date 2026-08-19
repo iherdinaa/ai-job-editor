@@ -1,6 +1,6 @@
 {
   "name": "AJT AI Hiring Job Posting Service",
-  "description": "",
+  "description": "Create, customize, and post professional free job ads in seconds with AJobThing AI Job Assistant. Hire interns, part-timers, freelancers, and top talent across Malaysia and Singapore.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

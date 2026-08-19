@@ -250,22 +250,8 @@ export async function generateAIResponse(
     if (detectedType === "singapore") {
       updates.location = "Singapore";
       updates.salaryCurrency = "SGD";
-      if (!currentJobData.salaryMin || currentJobData.salaryMin === "0") {
-        updates.salaryMin = "2800";
-        updates.salaryMax = "4500";
-      }
-    } else if (detectedType === "highpay") {
+    } else {
       updates.salaryCurrency = "RM";
-      if (!currentJobData.salaryMin || parseInt(currentJobData.salaryMin) < 8000) {
-        updates.salaryMin = "8500";
-        updates.salaryMax = "14000";
-      }
-    } else if (detectedType === "internship") {
-      updates.salaryCurrency = "RM";
-      if (!currentJobData.salaryMin || currentJobData.salaryMin === "0") {
-        updates.salaryMin = "1000";
-        updates.salaryMax = "1500";
-      }
     }
   }
 

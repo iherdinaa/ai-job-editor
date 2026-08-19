@@ -23,31 +23,26 @@ async function generateWithModelFallback(params: {
   contents: any;
   config?: any;
 }) {
-  try {
-    return await ai.models.generateContent({
-      model: 'gemini-3.7-flash',
-      contents: params.contents,
-      config: params.config
-    });
-  } catch (err: any) {
-    // If model is busy (503) or rate limited (429), try gemini-3.1-flash-lite
-    const isOverloadedOrQuota = err?.status === 503 || err?.status === 429 || 
-      err?.message?.includes('503') || err?.message?.includes('429') ||
-      err?.message?.includes('UNAVAILABLE') || err?.message?.includes('RESOURCE_EXHAUSTED');
-    
-    if (isOverloadedOrQuota) {
-      try {
-        return await ai.models.generateContent({
-          model: 'gemini-3.1-flash-lite',
-          contents: params.contents,
-          config: params.config
-        });
-      } catch (liteErr) {
-        throw liteErr;
-      }
+  const models = ['gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.7-flash'];
+  let lastErr: any = null;
+
+  for (const model of models) {
+    try {
+      return await ai.models.generateContent({
+        model,
+        contents: params.contents,
+        config: {
+          ...params.config,
+          maxOutputTokens: 800,
+          temperature: 0.3
+        }
+      });
+    } catch (err: any) {
+      lastErr = err;
+      console.warn(`[AI Engine] Model ${model} fallback trigger:`, err?.status || err?.message || err);
     }
-    throw err;
   }
+  throw lastErr;
 }
 
 function getRoleFallback(jobTitle: string, jobType: string) {
@@ -196,18 +191,8 @@ function handleFallbackChat(message: string, currentJobData: any) {
     if (detectedType === "singapore") {
       updates.location = updates.location || "Singapore";
       updates.salaryCurrency = "SGD";
-    } else if (detectedType === "highpay") {
+    } else {
       updates.salaryCurrency = "RM";
-      if (!currentJobData?.salaryMin || parseInt(currentJobData.salaryMin) < 8000) {
-        updates.salaryMin = "8500";
-        updates.salaryMax = "14000";
-      }
-    } else if (detectedType === "internship") {
-      updates.salaryCurrency = "RM";
-      if (!currentJobData?.salaryMin || currentJobData.salaryMin === "0") {
-        updates.salaryMin = "1000";
-        updates.salaryMax = "1500";
-      }
     }
   }
 
@@ -519,49 +504,67 @@ app.post('/api/submit-job', async (req, res) => {
     const rawPhone = String(jobData.phone || '').trim();
     const safePhone = rawPhone ? (rawPhone.startsWith("'") ? rawPhone : `'${rawPhone}`) : '';
 
-    // Forward to Google Apps Script Webhook asynchronously so publishing returns instantly to the user
+    // Forward to Webhooks asynchronously (Google Apps Script + Lark Base Automation)
     const scriptUrl = process.env.AIEDITOR || process.env.GOOGLE_APPS_SCRIPT_URL || process.env.APPS_SCRIPT_URL;
-    
-    if (scriptUrl) {
-      // Background non-blocking execution to keep publishing under 150ms
-      (async () => {
+    const larkWebhookUrl = process.env.LARK_WEBHOOK_URL || "https://ajobthing.sg.larksuite.com/base/automation/webhook/event/T5q1a7hPAwoVIwhGBI6lHaDNggd";
+
+    const payload = {
+      submissionId,
+      timestamp,
+      location: jobData.location,
+      jobTitle: jobData.title,
+      title: jobData.title,
+      company: jobData.company,
+      jobType: jobData.jobType,
+      salary: `${jobData.salaryCurrency || 'RM'} ${jobData.salaryMin} - ${jobData.salaryMax} / ${jobData.salaryPeriod || 'month'}`,
+      hiringCount: jobData.vacancies || "1",
+      requirements: Array.isArray(jobData.requirements) ? jobData.requirements.map((r: string) => `• ${r}`).join('\n') : (jobData.requirements || ''),
+      responsibility: Array.isArray(jobData.responsibilities) ? jobData.responsibilities.map((r: string) => `• ${r}`).join('\n') : (jobData.responsibilities || ''),
+      benefit: Array.isArray(jobData.benefits) ? jobData.benefits.join(', ') : (jobData.benefits || ''),
+      skills: Array.isArray(jobData.skills) ? jobData.skills.join(', ') : (jobData.skills || ''),
+      email: jobData.email,
+      phone: safePhone,
+      contactEmail: jobData.email,
+      contactPhone: safePhone,
+      'Contact Email': jobData.email,
+      'Contact Phone': safePhone,
+      positionLevel: jobData.positionLevel || 'Entry Level',
+      education: jobData.education || 'No Limit',
+      experience: jobData.experience || 'No Experience',
+      freshGraduates: jobData.freshGraduates ? 'Yes' : 'No',
+      description: jobData.description
+    };
+
+    // Background non-blocking execution to keep publishing under 150ms
+    (async () => {
+      // 1. Google Sheets / Apps Script Webhook
+      if (scriptUrl) {
         try {
           await fetch(scriptUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              submissionId,
-              timestamp,
-              location: jobData.location,
-              jobTitle: jobData.title,
-              title: jobData.title,
-              company: jobData.company,
-              jobType: jobData.jobType,
-              salary: `${jobData.salaryCurrency || 'RM'} ${jobData.salaryMin} - ${jobData.salaryMax} / ${jobData.salaryPeriod || 'month'}`,
-              hiringCount: jobData.vacancies || "1",
-              requirements: Array.isArray(jobData.requirements) ? jobData.requirements.map((r: string) => `• ${r}`).join('\n') : (jobData.requirements || ''),
-              responsibility: Array.isArray(jobData.responsibilities) ? jobData.responsibilities.map((r: string) => `• ${r}`).join('\n') : (jobData.responsibilities || ''),
-              benefit: Array.isArray(jobData.benefits) ? jobData.benefits.join(', ') : (jobData.benefits || ''),
-              skills: Array.isArray(jobData.skills) ? jobData.skills.join(', ') : (jobData.skills || ''),
-              email: jobData.email,
-              phone: safePhone,
-              contactEmail: jobData.email,
-              contactPhone: safePhone,
-              'Contact Email': jobData.email,
-              'Contact Phone': safePhone,
-              positionLevel: jobData.positionLevel || 'Entry Level',
-              education: jobData.education || 'No Limit',
-              experience: jobData.experience || 'No Experience',
-              freshGraduates: jobData.freshGraduates ? 'Yes' : 'No',
-              description: jobData.description
-            })
+            body: JSON.stringify(payload)
           });
           console.log(`[Google Sheets] Successfully submitted ${submissionId}`);
         } catch (err) {
           console.warn('[Google Sheets] Webhook forward notification:', err);
         }
-      })();
-    }
+      }
+
+      // 2. Lark Base Automation Webhook
+      if (larkWebhookUrl) {
+        try {
+          await fetch(larkWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          console.log(`[Lark Webhook] Successfully submitted ${submissionId}`);
+        } catch (err) {
+          console.warn('[Lark Webhook] Webhook forward notification:', err);
+        }
+      }
+    })();
 
     res.json({
       success: true,
