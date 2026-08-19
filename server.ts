@@ -1,4 +1,5 @@
 import express from 'express';
+import { createServer as httpCreateServer } from 'http';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
@@ -587,9 +588,17 @@ app.get('/api/submissions', (req, res) => {
 });
 
 async function startServer() {
+  const httpServer = httpCreateServer(app);
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        // Share the existing HTTP server for HMR so the WebSocket upgrade is
+        // proxied over the same host/port as the page. The v0 preview serves
+        // over wss on 443, so tell the client to use that port.
+        hmr: { server: httpServer, clientPort: 443 },
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);
@@ -601,7 +610,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
