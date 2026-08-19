@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -242,6 +241,9 @@ function handleFallbackChat(message: string, currentJobData: any) {
     updates.description = `We are looking for a passionate ${effectiveTitle} to join ${effectiveCompany || 'our team'} in ${effectiveLocation}. You will play a key role in driving impactful work.`;
   }
 
+  // We have the "basics" once a title and company are known; only then do we
+  // progress the guided flow to asking for job type and salary.
+  const hasBasicNow = !!(effectiveTitle && effectiveCompany);
   const actualType = updates.jobType || currentType;
   const actualSalaryMin = updates.salaryMin || currentJobData?.salaryMin;
 
@@ -629,6 +631,9 @@ async function startServer() {
   const httpServer = http.createServer(app);
 
   if (process.env.NODE_ENV !== "production") {
+    // Lazy-load Vite so it is only pulled in for local/preview dev, never bundled
+    // into the Vercel serverless function.
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       // Share the same HTTP server for Vite's HMR WebSocket so it uses the
       // exposed port instead of the default standalone port (24678), which is
@@ -650,4 +655,11 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel the app runs as a serverless function (see api/[...path].ts), which
+// imports the exported `app` — so we must NOT start a long-running listener there.
+// Locally and in the v0 preview (VERCEL unset) we start the Express + Vite server.
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
