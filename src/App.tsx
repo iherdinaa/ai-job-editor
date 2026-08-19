@@ -78,6 +78,7 @@ You can review the preview on the right or use the quick buttons below to refine
 
   const validateJob = (data: JobData): string[] => {
     const errors: string[] = [];
+    if (!data.company.trim()) errors.push("Company name is required.");
     if (!data.title.trim()) errors.push("Job title is required.");
     if (!data.location.trim()) errors.push("Location is required.");
     
@@ -177,6 +178,7 @@ You can review the preview on the right or use the quick buttons below to refine
     const errors = validateJob(jobData);
     if (errors.length > 0) {
       setValidationErrors(errors);
+      setView('editor');
       setIsEditMode(true); // Force edit mode to show errors
       return;
     }
