@@ -1,0 +1,8 @@
+{
+  "name": "AJT AI Hiring Job Posting Service",
+  "description": "",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
