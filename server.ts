@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 8080;
 
 const ai = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY,
@@ -237,6 +237,7 @@ function handleFallbackChat(message: string, currentJobData: any) {
     updates.description = `We are looking for a passionate ${effectiveTitle} to join ${effectiveCompany || 'our team'} in ${effectiveLocation}. You will play a key role in driving impactful work.`;
   }
 
+  const hasBasicNow = Boolean(effectiveTitle && effectiveCompany);
   const actualType = updates.jobType || currentType;
   const actualSalaryMin = updates.salaryMin || currentJobData?.salaryMin;
 
