@@ -27,7 +27,19 @@ export default function ContactConfirmModal({
     if (isOpen) {
       setCompany(jobData.company || "");
       setEmail(jobData.email || "");
-      setPhone(jobData.phone || "");
+      
+      let rawPhone = jobData.phone || "";
+      if (rawPhone.startsWith("+60")) {
+        rawPhone = rawPhone.replace(/^\+60\s*/, "");
+      } else if (rawPhone.startsWith("60")) {
+        rawPhone = rawPhone.replace(/^60\s*/, "");
+      } else if (rawPhone.startsWith("'")) {
+        rawPhone = rawPhone.replace(/^'\s*/, "");
+        if (rawPhone.startsWith("+60")) {
+          rawPhone = rawPhone.replace(/^\+60\s*/, "");
+        }
+      }
+      setPhone(rawPhone);
       setErrorMessage("");
     }
   }, [isOpen, jobData.company, jobData.email, jobData.phone]);
@@ -52,15 +64,19 @@ export default function ContactConfirmModal({
       return;
     }
 
-    if (!phone.trim()) {
+    const cleanRawPhone = phone.trim().replace(/^0+/, "");
+    if (!cleanRawPhone) {
       setErrorMessage("Please enter a contact phone or WhatsApp number.");
       return;
     }
 
+    // Format formatted Malaysian phone number (+60 XX-XXX XXXX)
+    const formattedPhone = `+60 ${cleanRawPhone}`;
+
     setErrorMessage("");
     onConfirm({ 
       email: email.trim(), 
-      phone: phone.trim(), 
+      phone: formattedPhone, 
       company: company.trim() 
     });
   };
@@ -144,24 +160,26 @@ export default function ContactConfirmModal({
             </div>
           </div>
 
-          {/* Phone / WhatsApp */}
+          {/* Phone / WhatsApp with Malaysian Flag and +60 */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Contact Phone / WhatsApp <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <Phone className="w-4 h-4" />
+            <div className="relative flex rounded-xl overflow-hidden border border-slate-300 focus-within:border-[#F9A121] focus-within:ring-2 focus-within:ring-[#F9A121]/30">
+              <div className="inline-flex items-center px-3.5 bg-slate-100 border-r border-slate-300 text-slate-700 text-xs sm:text-sm font-semibold select-none shrink-0 gap-1.5">
+                <span className="text-base leading-none">🇲🇾</span>
+                <span>+60</span>
               </div>
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. +6012-3456789"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F9A121]/30 focus:border-[#F9A121]"
+                onChange={(e) => setPhone(e.target.value.replace(/[^0-9\s-]/g, ''))}
+                placeholder="12-345 6789"
+                className="w-full px-3.5 py-2.5 bg-slate-50 text-sm text-slate-900 focus:bg-white focus:outline-none"
                 disabled={isSubmitting}
               />
             </div>
+            <p className="text-[11px] text-slate-500 mt-1">e.g. 12-345 6789 or 11-1234 5678</p>
           </div>
 
           {/* Information Pill */}

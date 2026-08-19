@@ -298,10 +298,11 @@ export async function generateAIResponse(
 
   // 3. Conversational Next Step Detection
   const hasBasicNow = Boolean((effectiveTitle && effectiveTitle.trim()) && (effectiveCompany && effectiveCompany.trim()));
-  const hasJobTypeNow = Boolean(detectedType || (currentJobData.jobType && (updates.salaryMin || salStr)));
+  const actualType = updates.jobType || currentJobData.jobType;
+  const actualSalaryMin = updates.salaryMin || currentJobData.salaryMin;
 
-  // If user just provided basic info (Step 1) -> Ask Step 2: Job Type
-  if (hasBasicNow && !detectedType && !updates.salaryMin && !salStr) {
+  // Ask STEP 2: Job Type
+  if (hasBasicNow && !actualType) {
     return {
       message: `Great! I've noted down **${effectiveTitle}** at **${effectiveCompany}** (${effectiveLocation || 'Malaysia'}).
 
@@ -310,8 +311,8 @@ What is the **Job Type** for this role?`,
     };
   }
 
-  // If user just provided Job Type (Step 2) -> Ask Step 3: Salary
-  if (hasBasicNow && detectedType && !updates.salaryMin && !salStr) {
+  // Ask STEP 3: Salary
+  if (hasBasicNow && actualType && !actualSalaryMin) {
     const typeLabelMap: Record<string, string> = {
       internship: "Internship (🎓)",
       parttime: "Part-time (⏱️)",
@@ -320,15 +321,15 @@ What is the **Job Type** for this role?`,
       volunteer: "Volunteer (🤝)",
       singapore: "Singapore Job (🇸🇬)"
     };
-    const typeLabel = typeLabelMap[detectedType] || detectedType;
+    const typeLabel = typeLabelMap[actualType] || actualType;
 
-    const sampleExample = detectedType === "internship" 
+    const sampleExample = actualType === "internship" 
       ? "RM 1,000 - RM 1,800 / month, or Unpaid" 
-      : detectedType === "highpay"
+      : actualType === "highpay"
         ? "RM 8,500 - RM 14,000 / month"
-        : detectedType === "singapore"
+        : actualType === "singapore"
           ? "SGD 3,000 - SGD 4,500 / month"
-          : detectedType === "parttime"
+          : actualType === "parttime"
             ? "RM 15 - RM 25 / hour, or RM 1,500 / month"
             : "RM 1,500 - RM 3,500 / month";
 
