@@ -3,12 +3,17 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
+import http from 'http';
 
-dotenv.config();
+// Load the standard env cascade so project variables (GEMINI_API_KEY, AIEDITOR,
+// GOOGLE_APPS_SCRIPT_URL, LARK_WEBHOOK_URL, etc.) are available. Plain `.env` alone
+// misses `.env.development.local`/`.env.local`, which is where these are injected.
+// Earlier files in the list take precedence for a given key.
+dotenv.config({ path: ['.env.development.local', '.env.local', '.env'], quiet: true });
 
 const app = express();
 app.use(express.json());
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 const ai = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY,
@@ -484,6 +489,40 @@ const submissions: Array<{
   jobData: any;
 }> = [];
 
+// Reliably forward a payload to a webhook with a timeout and retries.
+// Returns true only when the destination actually accepts the request (HTTP 2xx/3xx).
+// Google Apps Script responds with a 302 redirect to script.googleusercontent.com
+// after doPost() has already executed, so a followed redirect ending in 2xx means success.
+async function forwardWebhook(url: string, payload: unknown, label: string, attempts = 3): Promise<boolean> {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        redirect: 'follow',
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (resp.ok) {
+        console.log(`[${label}] Recorded successfully (HTTP ${resp.status}) on attempt ${attempt}`);
+        return true;
+      }
+      console.warn(`[${label}] Non-OK response (HTTP ${resp.status}) on attempt ${attempt}`);
+    } catch (err) {
+      clearTimeout(timeout);
+      console.warn(`[${label}] Request failed on attempt ${attempt}:`, err instanceof Error ? err.message : err);
+    }
+    if (attempt < attempts) {
+      await new Promise((r) => setTimeout(r, attempt * 500));
+    }
+  }
+  console.error(`[${label}] Failed to record after ${attempts} attempts`);
+  return false;
+}
+
 app.post('/api/submit-job', async (req, res) => {
   try {
     const jobData = req.body;
@@ -538,42 +577,27 @@ app.post('/api/submit-job', async (req, res) => {
       description: jobData.description
     };
 
-    // Background non-blocking execution to keep publishing under 150ms
-    (async () => {
-      // 1. Google Sheets / Apps Script Webhook
-      if (scriptUrl) {
-        try {
-          await fetch(scriptUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          console.log(`[Google Sheets] Successfully submitted ${submissionId}`);
-        } catch (err) {
-          console.warn('[Google Sheets] Webhook forward notification:', err);
-        }
-      }
+    // Forward to both destinations and wait for confirmation so we can report
+    // the true recording status instead of optimistically assuming success.
+    const [sheetRecorded, larkRecorded] = await Promise.all([
+      scriptUrl
+        ? forwardWebhook(scriptUrl, payload, `Google Sheets ${submissionId}`)
+        : Promise.resolve(false),
+      larkWebhookUrl
+        ? forwardWebhook(larkWebhookUrl, payload, `Lark ${submissionId}`)
+        : Promise.resolve(false),
+    ]);
 
-      // 2. Lark Base Automation Webhook
-      if (larkWebhookUrl) {
-        try {
-          await fetch(larkWebhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          console.log(`[Lark Webhook] Successfully submitted ${submissionId}`);
-        } catch (err) {
-          console.warn('[Lark Webhook] Webhook forward notification:', err);
-        }
-      }
-    })();
+    if (!scriptUrl) {
+      console.warn('[Google Sheets] No Apps Script URL configured (AIEDITOR / GOOGLE_APPS_SCRIPT_URL).');
+    }
 
     res.json({
-      success: true,
+      success: sheetRecorded || larkRecorded,
       submissionId,
       recordedAt: timestamp,
-      sheetRecorded: true
+      sheetRecorded,
+      larkRecorded
     });
   } catch (error) {
     console.error('Submit error:', error);
@@ -586,9 +610,14 @@ app.get('/api/submissions', (req, res) => {
 });
 
 async function startServer() {
+  const httpServer = http.createServer(app);
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      // Share the same HTTP server for Vite's HMR WebSocket so it uses the
+      // exposed port instead of the default standalone port (24678), which is
+      // not reachable in the preview and causes "WebSocket closed without opened".
+      server: { middlewareMode: true, hmr: { server: httpServer } },
       appType: "spa",
     });
     app.use(vite.middlewares);
@@ -600,7 +629,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

@@ -200,8 +200,8 @@ You can review the preview on the right or use the quick buttons below to refine
     setSubmissionId(newSubmissionId);
     
     try {
-      // Submit to server API endpoint (persists and forwards to Google Apps Script)
-      await fetch('/api/submit-job', {
+      // Submit to server API endpoint (persists and forwards to Google Apps Script + Lark)
+      const res = await fetch('/api/submit-job', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -209,6 +209,15 @@ You can review the preview on the right or use the quick buttons below to refine
           submissionId: newSubmissionId
         })
       });
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        console.warn('[submit-job] Recording not confirmed:', result);
+      } else {
+        console.log('[submit-job] Recorded:', {
+          sheetRecorded: result.sheetRecorded,
+          larkRecorded: result.larkRecorded,
+        });
+      }
     } catch (e) {
       console.warn('Google Sheets logging notification:', e);
     } finally {
