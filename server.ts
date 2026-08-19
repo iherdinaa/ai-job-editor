@@ -547,6 +547,18 @@ app.post('/api/submit-job', async (req, res) => {
     const scriptUrl = process.env.AIEDITOR || process.env.GOOGLE_APPS_SCRIPT_URL || process.env.APPS_SCRIPT_URL;
     const larkWebhookUrl = process.env.LARK_WEBHOOK_URL || "https://ajobthing.sg.larksuite.com/base/automation/webhook/event/T5q1a7hPAwoVIwhGBI6lHaDNggd";
 
+    // Build a clean salary string; avoid emitting a malformed "RM  -  / monthly" when values are missing.
+    const currency = jobData.salaryCurrency || 'RM';
+    const period = jobData.salaryPeriod || 'monthly';
+    const salMin = String(jobData.salaryMin ?? '').trim();
+    const salMax = String(jobData.salaryMax ?? '').trim();
+    let salaryStr = '';
+    if (period === 'none') {
+      salaryStr = 'No basic salary';
+    } else if (salMin || salMax) {
+      salaryStr = `${currency} ${salMin || salMax} - ${salMax || salMin} / ${period}`;
+    }
+
     const payload = {
       submissionId,
       timestamp,
@@ -558,7 +570,11 @@ app.post('/api/submit-job', async (req, res) => {
       'Company Name': jobData.company,
       'Company': jobData.company,
       jobType: jobData.jobType,
-      salary: `${jobData.salaryCurrency || 'RM'} ${jobData.salaryMin} - ${jobData.salaryMax} / ${jobData.salaryPeriod || 'month'}`,
+      employmentType: jobData.employmentType,
+      salaryMin: salMin,
+      salaryMax: salMax,
+      salaryPeriod: period,
+      salary: salaryStr,
       hiringCount: jobData.vacancies || "1",
       requirements: Array.isArray(jobData.requirements) ? jobData.requirements.map((r: string) => `• ${r}`).join('\n') : (jobData.requirements || ''),
       responsibility: Array.isArray(jobData.responsibilities) ? jobData.responsibilities.map((r: string) => `• ${r}`).join('\n') : (jobData.responsibilities || ''),
