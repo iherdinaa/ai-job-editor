@@ -14,14 +14,23 @@ const app = express();
 app.use(express.json());
 const PORT = Number(process.env.PORT) || 3000;
 
-const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build'
-    }
+// Lazy-initialize the AI client so importing this module never throws at load
+// time (e.g. a bad/missing GEMINI_API_KEY). A top-level throw here would crash
+// the whole Vercel serverless function before any request handler could run.
+let _ai: GoogleGenAI | null = null;
+function getAi(): GoogleGenAI {
+  if (!_ai) {
+    _ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build'
+        }
+      }
+    });
   }
-});
+  return _ai;
+}
 
 async function generateWithModelFallback(params: {
   contents: any;
@@ -32,7 +41,7 @@ async function generateWithModelFallback(params: {
 
   for (const model of models) {
     try {
-      return await ai.models.generateContent({
+      return await getAi().models.generateContent({
         model,
         contents: params.contents,
         config: {
