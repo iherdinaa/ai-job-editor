@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Mail, Phone, Building, X, Sparkles, AlertCircle } from "lucide-react";
 import { JobData } from "../types";
 
@@ -22,10 +22,25 @@ export default function ContactConfirmModal({
   const [company, setCompany] = useState(jobData.company || "");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Sync state whenever modal opens or jobData updates
+  useEffect(() => {
+    if (isOpen) {
+      setCompany(jobData.company || "");
+      setEmail(jobData.email || "");
+      setPhone(jobData.phone || "");
+      setErrorMessage("");
+    }
+  }, [isOpen, jobData.company, jobData.email, jobData.phone]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!company.trim()) {
+      setErrorMessage("Please enter your company name.");
+      return;
+    }
 
     if (!email.trim()) {
       setErrorMessage("Please enter a contact email address.");
@@ -42,13 +57,12 @@ export default function ContactConfirmModal({
       return;
     }
 
-    if (!company.trim()) {
-      setErrorMessage("Please enter your company name.");
-      return;
-    }
-
     setErrorMessage("");
-    onConfirm({ email: email.trim(), phone: phone.trim(), company: company.trim() });
+    onConfirm({ 
+      email: email.trim(), 
+      phone: phone.trim(), 
+      company: company.trim() 
+    });
   };
 
   return (
@@ -153,7 +167,7 @@ export default function ContactConfirmModal({
           {/* Information Pill */}
           <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs text-amber-900 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#F9A121] shrink-0" />
-            <span>This contact info will be stored directly into your Google Sheet record.</span>
+            <span>This contact info will be used to verify your AJobThing account.</span>
           </div>
 
           {/* Modal Action Buttons */}
