@@ -12,15 +12,12 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
     <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
       {/* Branded header band — gives the page a clear top-of-page anchor instead of flat white */}
       <div className="bg-gradient-to-br from-[#0E1F28] to-[#16303F] pt-9 pb-24 sm:pb-28 px-4 text-center shrink-0">
-        {/* White pill behind the logo so it stays visible regardless of the dark header background */}
-        <div className="inline-flex bg-white rounded-lg px-4 py-2 shadow-md">
-          <img
-            src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png"
-            alt="AJobThing"
-            className="h-7 sm:h-8 w-auto object-contain"
-          />
-        </div>
-        <p className="text-white/60 text-[11px] sm:text-xs font-bold uppercase tracking-widest mt-3">
+        <img
+          src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png"
+          alt="AJobThing"
+          className="h-8 sm:h-9 w-auto object-contain mx-auto"
+        />
+        <p className="text-white/50 text-[11px] sm:text-xs font-bold uppercase tracking-widest mt-2.5">
           AI Job Ad Assistant
         </p>
       </div>
@@ -113,9 +110,9 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
             </button>
             <button
               onClick={onEdit}
-              className="w-full px-6 py-3 bg-white border-2 border-[#E8ECF0] text-[#0E1F28] font-bold text-sm rounded-lg hover:border-[#F9A121] hover:text-[#F9A121] transition-colors flex items-center justify-center gap-2"
+              className="w-full px-6 py-2 bg-transparent text-[#556570] font-semibold text-sm rounded-lg hover:text-[#0E1F28] transition-colors flex items-center justify-center gap-1.5"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3.5 h-3.5" />
               Edit job ad before posting
             </button>
           </div>
