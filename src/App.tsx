@@ -351,7 +351,7 @@ You can review the preview on the right or use the quick buttons below to refine
           <img 
             src="https://files.ajobthing.com/employers/premium_logo_brand-119511-1759997194.jpeg" 
             alt="AJobThing" 
-            className="h-9 sm:h-10 w-auto object-contain" 
+            className="h-11 sm:h-12 w-auto object-contain rounded-md" 
           />
         </div>
         

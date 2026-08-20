@@ -18,7 +18,7 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
             <img 
               src="https://files.ajobthing.com/employers/premium_logo_brand-119511-1759997194.jpeg" 
               alt="AJobThing" 
-              className="h-8 sm:h-10 w-auto object-contain" 
+              className="h-16 sm:h-20 w-auto object-contain rounded-lg" 
             />
           </div>
 
@@ -28,7 +28,7 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
             </div>
             <h2 className="text-2xl font-extrabold text-[#0E1F28] mb-2">Your Job Ad Is Ready 🎉</h2>
             <p className="text-[#556570] text-sm md:text-base max-w-md mx-auto leading-relaxed">
-              We&apos;ve created a job ad for you. Review it, make changes with AI, and post on Maukerja and Ricebowl when you&apos;re ready without login.
+              We&apos;ve prepared a job ad for you. Review below, make changes with AI by clicking Edit Job Ad, and post on Maukerja and Ricebowl Malaysia when you&apos;re ready without login.
             </p>
           </div>
 
