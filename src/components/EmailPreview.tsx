@@ -26,9 +26,9 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FFF4E0] text-[#F9A121] mb-4 shadow-inner">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-extrabold text-[#0E1F28] mb-2">Your AI Job Ad Is Ready 🎉</h2>
+            <h2 className="text-2xl font-extrabold text-[#0E1F28] mb-2">Your Job Ad Is Ready 🎉</h2>
             <p className="text-[#556570] text-sm md:text-base max-w-md mx-auto leading-relaxed">
-              We've created a job ad for you. Review it, make changes with AI, and post it when you're ready.
+              We&apos;ve created a job ad for you. Review it, make changes with AI, and post on Maukerja and Ricebowl Malaysia when you&apos;re ready.
             </p>
           </div>
 
