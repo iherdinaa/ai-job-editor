@@ -14,11 +14,24 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
         
         {/* Email Content */}
         <div className="p-6 md:p-8">
-          <div className="flex justify-center mb-5">
+          <div className="flex items-center justify-center gap-4 sm:gap-5 mb-5">
             <img 
               src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png" 
               alt="AJobThing" 
               className="h-8 sm:h-10 w-auto object-contain" 
+            />
+            <span className="w-px h-6 sm:h-8 bg-[#E8ECF0]" aria-hidden="true" />
+            <img 
+              src="https://play-lh.googleusercontent.com/7rf_1MBBxNpDJjFljfBUkxOAxADMCj-cAiE9Td1HOYstdsf1vJCKrRIgyuZLlCUgleptjnDdu_mS0kd-DbAPvg" 
+              alt="Maukerja" 
+              referrerPolicy="no-referrer"
+              className="h-8 sm:h-10 w-8 sm:w-10 object-contain rounded-lg" 
+            />
+            <img 
+              src="https://play-lh.googleusercontent.com/-7BI8k0wJedDZnxPGDZdC6wFM1-LosBlklp1dVRUQ-gSNInEKMaWiRVc5YzxzZZ7Hh6whioQbaZDo2C4AVwhBh0" 
+              alt="Ricebowl" 
+              referrerPolicy="no-referrer"
+              className="h-8 sm:h-10 w-8 sm:w-10 object-contain rounded-lg" 
             />
           </div>
 
@@ -26,9 +39,9 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FFF4E0] text-[#F9A121] mb-4 shadow-inner">
               <Sparkles className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-extrabold text-[#0E1F28] mb-2">Your AI Job Ad Is Ready 🎉</h2>
+            <h2 className="text-2xl font-extrabold text-[#0E1F28] mb-2">Your Job Ad Is Ready 🎉</h2>
             <p className="text-[#556570] text-sm md:text-base max-w-md mx-auto leading-relaxed">
-              We've created a job ad for you. Review it, make changes with AI, and post it when you're ready.
+              We&apos;ve prepared a job ad for you. Review below, make changes with AI by clicking Edit Job Ad, and post on Maukerja and Ricebowl Malaysia when you&apos;re ready without login.
             </p>
           </div>
 
