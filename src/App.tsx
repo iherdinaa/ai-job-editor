@@ -349,7 +349,7 @@ You can review the preview on the right or use the quick buttons below to refine
             ← Back
           </button>
           <img 
-            src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png" 
+            src="https://files.ajobthing.com/employers/premium_logo_brand-119511-1759997194.jpeg" 
             alt="AJobThing" 
             className="h-9 sm:h-10 w-auto object-contain" 
           />
