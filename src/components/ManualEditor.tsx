@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { JobData, JobType } from "../types";
-import { Sparkles, AlertCircle, X, List, ListOrdered, Undo, Plus, MapPin, Check, Mail, Phone, MessageSquare, Eye } from "lucide-react";
+import { Sparkles, AlertCircle, X, List, ListOrdered, Undo, Plus, MapPin, Check, Mail, Phone, MessageSquare, Eye, Edit3 } from "lucide-react";
 
 interface ManualEditorProps {
   jobData: JobData;
@@ -397,19 +397,21 @@ export default function ManualEditor({ jobData, onUpdate, validationErrors, isEd
           <h2 className="text-sm font-bold text-[#0E1F28]">Manual Edit Form</h2>
           <p className="text-xs text-[#556570]">Edit full job fields manually</p>
         </div>
-        <div className="bg-slate-100 p-1 rounded-xl flex items-center gap-1 border border-slate-200/80">
+        <div className="bg-slate-100 p-1.5 rounded-xl flex items-center gap-1.5 border border-slate-200/80">
           <button 
             type="button"
             onClick={() => onToggleEdit()}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${!isEditMode ? 'bg-white text-[#0E1F28] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-base font-bold transition-all cursor-pointer ${!isEditMode ? 'bg-white text-[#0E1F28] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
           >
+            <Eye className="w-5 h-5 text-amber-500" />
             Preview
           </button>
           <button 
             type="button"
             onClick={() => {}}
-            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${isEditMode ? 'bg-white text-[#0E1F28] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-base font-bold transition-all cursor-pointer ${isEditMode ? 'bg-white text-[#0E1F28] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
           >
+            <Edit3 className="w-5 h-5 text-slate-500" />
             Edit Form
           </button>
         </div>
