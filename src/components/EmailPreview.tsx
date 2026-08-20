@@ -9,23 +9,32 @@ interface EmailPreviewProps {
 
 export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewProps) {
   return (
-    <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-        
+    <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
+      {/* Branded header band — gives the page a clear top-of-page anchor instead of flat white */}
+      <div className="bg-gradient-to-br from-[#0E1F28] to-[#16303F] pt-9 pb-24 sm:pb-28 px-4 text-center shrink-0">
+        <img
+          src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png"
+          alt="AJobThing"
+          className="h-8 sm:h-9 w-auto object-contain mx-auto"
+        />
+        <p className="text-white/50 text-[11px] sm:text-xs font-bold uppercase tracking-widest mt-2.5">
+          AI Job Ad Assistant
+        </p>
+      </div>
+
+      {/* Card overlaps the band seam so it reads as the one thing to focus on */}
+      <div className="flex-1 flex justify-center px-4 -mt-16 sm:-mt-20 pb-10">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl shadow-black/20 overflow-hidden border border-gray-100 h-fit">
+        {/* Accent bar makes the card's top edge pop against the header */}
+        <div className="h-1.5 bg-gradient-to-r from-[#F9A121] to-[#FFC65C]" />
+
         {/* Email Content */}
         <div className="p-6 md:p-8">
-          <div className="flex justify-center mb-5">
-            <img 
-              src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png" 
-              alt="AJobThing" 
-              className="h-8 sm:h-10 w-auto object-contain" 
-            />
-          </div>
-
           <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#FFF4E0] text-[#F9A121] mb-4 shadow-inner">
-              <Sparkles className="w-6 h-6" />
-            </div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF4E0] text-[#B9700A] text-[11px] font-bold uppercase tracking-wide mb-4">
+              <Sparkles className="w-3 h-3" />
+              Draft ready for review
+            </span>
             <h2 className="text-2xl font-extrabold text-[#0E1F28] mb-2">Your AI Job Ad Is Ready 🎉</h2>
             <p className="text-[#556570] text-sm md:text-base max-w-md mx-auto leading-relaxed">
               We've created a job ad for you. Review it, make changes with AI, and post it when you're ready.
@@ -91,30 +100,25 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <button 
-              onClick={onEdit}
-              className="w-full sm:w-auto px-6 py-2.5 bg-white border-2 border-[#E8ECF0] text-[#0E1F28] font-bold rounded-lg hover:border-[#F9A121] hover:text-[#F9A121] transition-colors flex items-center justify-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              Edit Job Ad
-            </button>
-            <button 
+          <div className="flex flex-col gap-3">
+            <button
               onClick={onPost}
-              className="w-full sm:w-auto px-6 py-2.5 bg-[#F9A121] text-white font-bold rounded-lg hover:bg-[#EE9410] transition-colors shadow-lg shadow-orange-500/20 flex items-center justify-center gap-2"
+              className="w-full px-6 py-3.5 bg-[#F9A121] text-white text-base font-bold rounded-lg hover:bg-[#EE9410] transition-colors shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2"
             >
               Post This Job
               <ArrowRight className="w-4 h-4" />
             </button>
-          </div>
-          
-          <div className="text-center mt-4">
-             <button onClick={onEdit} className="text-[13px] sm:text-sm font-semibold text-[#556570] hover:text-[#F9A121] underline underline-offset-4">
-                View full job ad
-             </button>
+            <button
+              onClick={onEdit}
+              className="w-full px-6 py-2 bg-transparent text-[#556570] font-semibold text-sm rounded-lg hover:text-[#0E1F28] transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Edit job ad before posting
+            </button>
           </div>
 
         </div>
+      </div>
       </div>
     </div>
   );
