@@ -14,11 +14,24 @@ export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewPr
         
         {/* Email Content */}
         <div className="p-6 md:p-8">
-          <div className="flex justify-center mb-5">
+          <div className="flex items-center justify-center gap-4 sm:gap-5 mb-5">
             <img 
-              src="https://files.ajobthing.com/employers/premium_logo_brand-119511-1759997194.jpeg" 
+              src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png" 
               alt="AJobThing" 
-              className="h-16 sm:h-20 w-auto object-contain rounded-lg" 
+              className="h-8 sm:h-10 w-auto object-contain" 
+            />
+            <span className="w-px h-6 sm:h-8 bg-[#E8ECF0]" aria-hidden="true" />
+            <img 
+              src="https://play-lh.googleusercontent.com/7rf_1MBBxNpDJjFljfBUkxOAxADMCj-cAiE9Td1HOYstdsf1vJCKrRIgyuZLlCUgleptjnDdu_mS0kd-DbAPvg" 
+              alt="Maukerja" 
+              referrerPolicy="no-referrer"
+              className="h-8 sm:h-10 w-8 sm:w-10 object-contain rounded-lg" 
+            />
+            <img 
+              src="https://play-lh.googleusercontent.com/-7BI8k0wJedDZnxPGDZdC6wFM1-LosBlklp1dVRUQ-gSNInEKMaWiRVc5YzxzZZ7Hh6whioQbaZDo2C4AVwhBh0" 
+              alt="Ricebowl" 
+              referrerPolicy="no-referrer"
+              className="h-8 sm:h-10 w-8 sm:w-10 object-contain rounded-lg" 
             />
           </div>
 
