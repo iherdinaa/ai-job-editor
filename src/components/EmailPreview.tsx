@@ -9,20 +9,35 @@ interface EmailPreviewProps {
 
 export default function EmailPreview({ jobData, onEdit, onPost }: EmailPreviewProps) {
   return (
-    <div className="min-h-screen bg-[#F3F4F6] flex flex-col">
-      {/* Branded header band — gives the page a clear top-of-page anchor instead of flat white */}
-      <div className="bg-gradient-to-br from-[#0E1F28] to-[#16303F] pt-9 pb-24 sm:pb-28 px-4 text-center shrink-0">
-        {/* White pill behind the logo so it stays visible regardless of the dark header background */}
-        <div className="inline-flex bg-white rounded-lg px-4 py-2 shadow-md">
-          <img
-            src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png"
-            alt="AJobThing"
-            className="h-7 sm:h-8 w-auto object-contain"
-          />
+    <div className="min-h-screen bg-[#EEF1F4] flex flex-col">
+      {/* Branded header band — layered gradient + glow blobs + grid texture instead of a flat old-school color block */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#0B1A22] via-[#122A36] to-[#1B3A47] pt-9 pb-24 sm:pb-28 px-4 text-center shrink-0">
+        {/* Fine grid texture for depth */}
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Soft glow blobs for a modern SaaS feel */}
+        <div className="absolute -top-20 -left-16 w-64 h-64 bg-[#F9A121]/25 rounded-full blur-3xl" />
+        <div className="absolute -top-10 right-0 w-72 h-72 bg-[#3EC6E0]/15 rounded-full blur-3xl" />
+
+        <div className="relative">
+          {/* White pill behind the logo so it stays visible regardless of the dark header background */}
+          <div className="inline-flex bg-white rounded-lg px-4 py-2 shadow-md">
+            <img
+              src="https://files.ajobthing.com/assets/landing/a-job-thing-with-tagline.png"
+              alt="AJobThing"
+              className="h-7 sm:h-8 w-auto object-contain"
+            />
+          </div>
+          <p className="text-white/60 text-[11px] sm:text-xs font-bold uppercase tracking-widest mt-3">
+            AI Job Ad Assistant
+          </p>
         </div>
-        <p className="text-white/60 text-[11px] sm:text-xs font-bold uppercase tracking-widest mt-3">
-          AI Job Ad Assistant
-        </p>
       </div>
 
       {/* Card overlaps the band seam so it reads as the one thing to focus on */}
