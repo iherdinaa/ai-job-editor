@@ -12,6 +12,41 @@ import { CheckCircle } from 'lucide-react';
 
 type AppView = 'email' | 'editor' | 'success';
 
+const VALID_JOB_TYPES: JobData['jobType'][] = ['internship', 'parttime', 'freelance', 'volunteer', 'singapore', 'highpay'];
+
+// Infer the job type from the campaign title/hiring_inquiries text (e.g. "SOCIAL MEDIA INTERNSHIP" -> internship)
+function inferJobType(title: string): JobData['jobType'] {
+  const t = title.toLowerCase();
+  if (/\bintern(ship)?\b/.test(t)) return 'internship';
+  if (/part[\s-]?time/.test(t)) return 'parttime';
+  if (/\bfreelance\b/.test(t)) return 'freelance';
+  if (/\bvolunteer\b/.test(t)) return 'volunteer';
+  if (/high[\s-]?pay/.test(t)) return 'highpay';
+  if (/\bsingapore\b/.test(t)) return 'singapore';
+  return '';
+}
+
+// Sensible defaults per job type, mirroring the values ManualEditor uses,
+// so the recorded row always has a job type and salary instead of blanks.
+function defaultsForJobType(jobType: JobData['jobType']): Pick<JobData, 'salaryMin' | 'salaryMax' | 'salaryPeriod' | 'employmentType'> {
+  switch (jobType) {
+    case 'parttime':
+      return { salaryMin: '10', salaryMax: '25', salaryPeriod: 'hourly', employmentType: 'Part-time' };
+    case 'freelance':
+      return { salaryMin: '10', salaryMax: '25', salaryPeriod: 'hourly', employmentType: 'Freelance' };
+    case 'volunteer':
+      return { salaryMin: '0', salaryMax: '0', salaryPeriod: 'none', employmentType: 'Volunteer' };
+    case 'internship':
+      return { salaryMin: '800', salaryMax: '1200', salaryPeriod: 'monthly', employmentType: 'Internship' };
+    case 'highpay':
+      return { salaryMin: '8000', salaryMax: '12000', salaryPeriod: 'monthly', employmentType: 'High Pay (> RM8,000)' };
+    case 'singapore':
+      return { salaryMin: '3000', salaryMax: '5000', salaryPeriod: 'monthly', employmentType: 'Singapore Job (SGD)' };
+    default:
+      return { salaryMin: INITIAL_JOB_DATA.salaryMin, salaryMax: INITIAL_JOB_DATA.salaryMax, salaryPeriod: INITIAL_JOB_DATA.salaryPeriod, employmentType: INITIAL_JOB_DATA.employmentType };
+  }
+}
+
 function getInitialJobData(): JobData {
   if (typeof window === 'undefined') return INITIAL_JOB_DATA;
   const params = new URLSearchParams(window.location.search);
@@ -25,13 +60,31 @@ function getInitialJobData(): JobData {
   const cleanCompany = (rawCompany === '[FIRSTNAME]' || rawCompany === 'undefined' || rawCompany === 'null') ? '' : rawCompany;
   const cleanEmail = (rawEmail === '[EMAIL]' || rawEmail === 'undefined' || rawEmail === 'null') ? '' : rawEmail;
 
+  // Resolve job type: explicit URL param wins, otherwise infer from the title text.
+  const explicitType = (params.get('job_type') || params.get('jobType') || params.get('jobtype') || '').toLowerCase().trim();
+  const jobType: JobData['jobType'] = (VALID_JOB_TYPES as string[]).includes(explicitType)
+    ? (explicitType as JobData['jobType'])
+    : inferJobType(cleanTitle);
+
+  const typeDefaults = defaultsForJobType(jobType);
+
+  // Salary: explicit URL params win, otherwise fall back to the job-type defaults.
+  const urlSalaryMin = params.get('salaryMin') || params.get('salary_min') || params.get('salary') || '';
+  const urlSalaryMax = params.get('salaryMax') || params.get('salary_max') || '';
+  const urlSalaryPeriod = params.get('salaryPeriod') || params.get('salary_period') || '';
+
   return {
     ...INITIAL_JOB_DATA,
+    jobType,
+    employmentType: typeDefaults.employmentType,
     title: cleanTitle || INITIAL_JOB_DATA.title,
     company: cleanCompany || INITIAL_JOB_DATA.company,
     email: cleanEmail || INITIAL_JOB_DATA.email,
     phone: rawPhone || INITIAL_JOB_DATA.phone,
-    location: rawLocation || INITIAL_JOB_DATA.location
+    location: rawLocation || INITIAL_JOB_DATA.location,
+    salaryMin: urlSalaryMin || typeDefaults.salaryMin,
+    salaryMax: urlSalaryMax || typeDefaults.salaryMax,
+    salaryPeriod: (urlSalaryPeriod as JobData['salaryPeriod']) || typeDefaults.salaryPeriod
   };
 }
 
